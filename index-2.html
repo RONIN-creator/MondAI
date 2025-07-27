@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MondAI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      padding: 20px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+    select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    .response {
+      background: #1e1e1e;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>MondAI Assistant</h1>
+    <select id="tone">
+      <option value="professional">Professional</option>
+      <option value="witty">Witty</option>
+      <option value="friendly">Friendly</option>
+      <option value="hacker">Hacker-style</option>
+    </select>
+    <label><input type="checkbox" id="voiceToggle"> Enable Voice</label>
+    <textarea id="userInput" placeholder="Ask anything in any language..."></textarea>
+    <button onclick="askMondAI()">Ask MondAI</button>
+    <div class="response" id="response"></div>
+  </div>
+
+  <script>
+    async function askMondAI() {
+      const input = document.getElementById("userInput").value;
+      const tone = document.getElementById("tone").value;
+      const useVoice = document.getElementById("voiceToggle").checked;
+      const responseDiv = document.getElementById("response");
+
+      const res = await fetch("/.netlify/functions/askMondAI", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input, tone: tone })
+      });
+      const data = await res.json();
+      responseDiv.textContent = data.reply;
+
+      if (useVoice && 'speechSynthesis' in window) {
+        const utter = new SpeechSynthesisUtterance(data.reply);
+        utter.lang = 'auto';
+        window.speechSynthesis.speak(utter);
+      }
+    }
+  </script>
+</body>
+</html>
